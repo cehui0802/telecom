@@ -25,7 +25,7 @@
         <snapshotRepository>
             <id>nexus_snapshots</id>
             <name>snapshots</name>
-            <url>http://127.0.0.1:8085/repository/maven-releases/</url>
+            <url>http://127.0.0.1:8085/repository/maven-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 
