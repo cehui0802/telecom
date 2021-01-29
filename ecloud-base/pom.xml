@@ -1,0 +1,90 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.telecom</groupId>
+        <artifactId>ecloud-framework</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>ecloud-base</artifactId>
+    <packaging>pom</packaging>
+
+    <!-- 定义该项目聚合的子模块 -->
+    <modules>
+        <module>base-api</module>
+        <module>base-core</module>
+        <module>base-db</module>
+        <module>base-rest</module>
+    </modules>
+
+    <!-- 定义参数 -->
+    <properties>
+        <dom4j.version>1.6.1</dom4j.version>
+        <zip4j.version>1.3.1</zip4j.version>
+        <pingyin.version>2.5.0</pingyin.version>
+    </properties>
+
+    <!-- 定义全局的依赖，供子模块调用 -->
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>net.lingala.zip4j</groupId>
+                <artifactId>zip4j</artifactId>
+                <version>${zip4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.belerweb</groupId>
+                <artifactId>pinyin4j</artifactId>
+                <version>${pingyin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>dom4j</groupId>
+                <artifactId>dom4j</artifactId>
+                <version>${dom4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.telecom</groupId>
+                <artifactId>base-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.telecom</groupId>
+                <artifactId>base-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.telecom</groupId>
+                <artifactId>base-db</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.telecom</groupId>
+                <artifactId>base-rest</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+        </dependencies>
+    </dependencyManagement>
+
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+            </plugin> 
+        </plugins>
+    </build>
+</project>

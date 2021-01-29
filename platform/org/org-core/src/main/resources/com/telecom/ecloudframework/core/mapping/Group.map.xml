@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.telecom.ecloudframework.org.core.dao.GroupDao">
+    <resultMap id="Group" type="com.telecom.ecloudframework.org.core.model.Group">
+        <id property="id" column="id_" jdbcType="VARCHAR"/>
+        <result property="name" column="name_" jdbcType="VARCHAR"/>
+        <result property="parentId" column="parent_id_" jdbcType="VARCHAR"/>
+        <result property="code" column="code_" jdbcType="VARCHAR"/>
+        <result property="type" column="type_" jdbcType="NUMERIC"/>
+        <result property="desc" column="desc_" jdbcType="VARCHAR"/>
+        <result property="path" column="path_" jdbcType="VARCHAR"/>
+        <result property="sn" column="sn_" jdbcType="NUMERIC"/>
+        <result property="createTime" column="create_time_" jdbcType="TIMESTAMP"/>
+        <result property="createBy" column="create_by_" jdbcType="VARCHAR"/>
+        <result property="updateTime" column="update_time_" jdbcType="TIMESTAMP"/>
+        <result property="updateBy" column="update_by_" jdbcType="VARCHAR"/>
+        <result property="userNum" column="userNum" jdbcType="VARCHAR"/>
+        <result property="simple" column="simple_" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="tableName">
+        org_group
+    </sql>
+
+    <sql id="forUpdate">
+        <if test="name != null">
+            name_ = #{name,jdbcType=VARCHAR},
+        </if>
+        <if test="parentId != null">
+            parent_id_ = #{parentId,jdbcType=VARCHAR},
+        </if>
+        <if test="code != null">
+            code_ = #{code,jdbcType=VARCHAR},
+        </if>
+        <if test="type != null">
+            type_ = #{type,jdbcType=NUMERIC},
+        </if>
+        <if test="desc != null">
+            desc_ = #{desc,jdbcType=NUMERIC},
+        </if>
+        <if test="path != null">
+            path_ = #{path,jdbcType=NUMERIC},
+        </if>
+        <if test="sn != null">
+            sn_ = #{sn,jdbcType=VARCHAR},
+        </if>
+        <if test="simple != null">
+            simple_ = #{simple,jdbcType=VARCHAR},
+        </if>
+        <if test="updateBy != null">
+            update_by_ = #{updateBy,jdbcType=VARCHAR},
+        </if>
+        <if test="updateTime != null">
+            update_time_ = #{updateTime,jdbcType=TIMESTAMP},
+        </if>
+    </sql>
+
+    <insert id="create" parameterType="com.telecom.ecloudframework.org.core.model.Group">
+        INSERT INTO
+        <include refid="tableName"/>
+        (id_,name_,parent_id_,code_,type_,desc_,path_,sn_,create_time_,create_by_,update_time_,update_by_,simple_)
+        VALUES
+        (#{id,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{parentId,jdbcType=VARCHAR}, #{code,jdbcType=VARCHAR},
+        #{type,jdbcType=NUMERIC}, #{desc,jdbcType=VARCHAR}, #{path,jdbcType=VARCHAR}, #{sn,jdbcType=NUMERIC},
+        #{createTime,jdbcType=TIMESTAMP}, #{createBy,jdbcType=VARCHAR}, #{updateTime,jdbcType=TIMESTAMP},
+        #{updateBy,jdbcType=VARCHAR},#{simple,jdbcType=VARCHAR})
+    </insert>
+
+    <select id="get" parameterType="java.lang.String" resultMap="Group">
+        SELECT * FROM
+        <include refid="tableName"/>
+        WHERE
+        id_=#{id}
+    </select>
+
+    <select id="getByUserId" parameterType="java.lang.String" resultMap="Group">
+        SELECT distinct g.*,rel.is_master_ FROM
+        <include refid="tableName"/>
+        g
+        left join org_relation rel on group_id_ = g.id_
+        WHERE user_id_ = #{userId}
+        and rel.type_ in ('groupUser','groupUserRole') and rel.status_ = 1
+        <include refid="getByUserIdOrder"/>
+    </select>
+    <sql id="getByUserIdOrder" databaseId="kingbase">
+        order by rel.is_master_ desc, g.create_time_ desc
+    </sql>
+    <sql id="getByUserIdOrder">
+        order by isnull(rel.is_master_),rel.is_master_ desc, g.create_time_ desc
+    </sql>
+
+    <select id="query" parameterType="java.util.Map" resultMap="Group">
+        SELECT
+        <if test="resultType==null">
+            distinct torg.*
+        </if>
+        <if test="resultType=='onlyGroupId'">
+            distinct torg.id_,torg.sn_
+        </if>
+        <if test="resultType=='onlyGroupName'">
+            distinct torg.id_,torg.name_,torg.sn_
+        </if>
+        <if test="resultType=='withUserNum'">
+            distinct torg.*,groupUserNum.num as userNum
+        </if>
+        FROM
+        <include refid="tableName"/>
+        torg
+        <if test="userId != null">
+            inner join org_relation trelation on torg.id_ = trelation.group_id_
+            and trelation.status_=1
+            and trelation.type_='groupUser' and trelation.user_id_ = #{userId}
+        </if>
+        <if test="orgIds!=null">
+            <if test="orgHasChild==true">
+                inner join ORG_GROUP torgM on (torg.PATH_ like concat(torgM.PATH_,'%') and torgM.id_ in
+                <if test="null != orgIds and orgIds.size > 0">
+                    <foreach collection="orgIds" item="orgId" index="index" open="(" close=")" separator=",">
+                        #{orgId}
+                    </foreach>)
+                </if>
+                <if test="null != orgIds and orgIds.size == 0">
+                    (''))
+                </if>
+                <if test="null != noHasChildOrgIds">
+                    or torg.id_ in
+                    <if test="null != noHasChildOrgIds and noHasChildOrgIds.size > 0">
+                        <foreach collection="noHasChildOrgIds" item="orgId" index="index" open="(" close=")"
+                                 separator=",">
+                            #{orgId}
+                        </foreach>
+                    </if>
+                    <if test="null != noHasChildOrgIds and noHasChildOrgIds.size == 0">
+                        ('')
+                    </if>
+                </if>
+            </if>
+        </if>
+        <if test="resultType=='withUserNum'">
+            LEFT JOIN (
+            SELECT
+            zz.ID_,
+            count(1) AS num
+            FROM
+            (
+            SELECT DISTINCT
+            z.ID_,
+            c.ID_ AS user_id_
+            FROM
+            ORG_GROUP z,
+            ORG_GROUP a,
+            ORG_RELATION b,
+            ORG_USER c
+            WHERE
+            a.path_ LIKE concat(z.path_, '%')
+            AND a.ID_ = b.GROUP_ID_
+            AND b.USER_ID_ = c.ID_
+            AND c.ACTIVE_STATUS_ = '1'
+            AND c.TYPE_ = '1'
+            ) zz GROUP BY zz.ID_
+            ) groupUserNum ON torg.ID_ = groupUserNum.ID_
+        </if>
+        <where>
+            <if test="whereSql!=null">
+                ${whereSql}
+            </if>
+        </where>
+        <if test="orderBySql!=null">
+            ORDER BY ${orderBySql}
+        </if>
+        <if test="orderBySql==null">
+            ORDER BY sn_ ASC
+        </if>
+    </select>
+
+    <update id="update" parameterType="com.telecom.ecloudframework.org.core.model.Group">
+        UPDATE
+        <include refid="tableName"/>
+        SET
+        name_=#{name,jdbcType=VARCHAR},
+        parent_id_=#{parentId,jdbcType=VARCHAR},
+        code_=#{code,jdbcType=VARCHAR},
+        type_=#{type,jdbcType=NUMERIC},
+        desc_=#{desc,jdbcType=VARCHAR},
+        path_=#{path,jdbcType=VARCHAR},
+        sn_=#{sn,jdbcType=NUMERIC},
+        simple_=#{simple,jdbcType=NUMERIC},
+        update_time_=#{updateTime,jdbcType=TIMESTAMP},
+        update_by_=#{updateBy,jdbcType=VARCHAR}
+        WHERE
+        id_=#{id}
+    </update>
+
+    <delete id="remove" parameterType="java.lang.String">
+        DELETE FROM
+        <include refid="tableName"/>
+        WHERE
+        id_=#{id}
+    </delete>
+
+    <select id="getByCode" parameterType="map" resultMap="Group">
+        SELECT * FROM
+        <include refid="tableName"/>
+        WHERE
+        code_=#{code}
+        <if test="excludeId!=null">
+            and id_ != #{excludeId}
+        </if>
+    </select>
+
+    <select id="getChildByPath" parameterType="java.lang.String" resultMap="Group">
+        SELECT * FROM
+        <include refid="tableName"/>
+        WHERE
+        path_ like #{path}
+    </select>
+
+    <delete id="removeAll">
+    </delete>
+
+    <update id="chageOrder" parameterType="com.telecom.ecloudframework.org.core.model.Group">
+        UPDATE
+        <include refid="tableName"/>
+        SET
+        sn_=#{sn,jdbcType=NUMERIC}
+        WHERE
+        id_=#{id}
+    </update>
+
+    <update id="updateByPrimaryKeySelective" parameterType="com.telecom.ecloudframework.org.core.model.Group">
+        update
+        <include refid="tableName"/>
+        <set>
+            <include refid="forUpdate"/>
+        </set>
+        where id_ = #{id,jdbcType=VARCHAR}
+    </update>
+</mapper>

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.telecom.ecloudframework.security.core.dao.ClientDao">
+    <resultMap id="Client" type="com.telecom.ecloudframework.security.core.model.Client">
+        <id property="id" column="id_" jdbcType="VARCHAR"/>
+        <result property="name" column="name_" jdbcType="VARCHAR"/>
+        <result property="secretKey" column="secret_key_" jdbcType="VARCHAR"/>
+        <result property="sAuthority" column="authority_" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="tableName">
+        sys_client
+    </sql>
+
+    <sql id="forUpdate">
+        <if test="name != null">
+            name_ = #{name,jdbcType=VARCHAR},
+        </if>
+        <if test="secretKey != null">
+            secret_key_ = #{secretKey,jdbcType=VARCHAR},
+        </if>
+        <if test="sAuthority != null">
+            authority_ = #{sAuthority,jdbcType=VARCHAR},
+        </if>
+    </sql>
+
+    <insert id="create" parameterType="com.telecom.ecloudframework.security.core.model.Client">
+        INSERT INTO
+        <include refid="tableName"/>
+        (id_,name_,secret_key_,authority_)
+        VALUES
+        (#{id,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{secretKey,jdbcType=VARCHAR},
+        #{sAuthority,jdbcType=VARCHAR}
+        )
+    </insert>
+
+    <select id="get" parameterType="java.lang.String" resultMap="Client">
+        SELECT * FROM
+        <include refid="tableName"/>
+        WHERE
+        id_=#{id}
+    </select>
+
+    <select id="query" parameterType="java.util.Map" resultMap="Client">
+        SELECT distinct * FROM
+        <include refid="tableName"/>
+        tclient
+        <where>
+            <if test="whereSql!=null">
+                ${whereSql}
+            </if>
+        </where>
+        <if test="orderBySql!=null">
+            ORDER BY ${orderBySql}
+        </if>
+        <if test="orderBySql==null">
+            ORDER BY tclient.id_
+        </if>
+    </select>
+
+    <update id="update" parameterType="com.telecom.ecloudframework.security.core.model.Client">
+        UPDATE
+        <include refid="tableName"/>
+        SET
+        name_=#{name,jdbcType=VARCHAR},
+        secret_key_=#{secretKey,jdbcType=VARCHAR},
+        authority_=#{sAuthority,jdbcType=VARCHAR}
+        WHERE
+        id_=#{id}
+    </update>
+
+    <delete id="remove" parameterType="java.lang.String">
+        DELETE FROM
+        <include refid="tableName"/>
+        WHERE
+        id_=#{id}
+    </delete>
+
+    <update id="updateByPrimaryKeySelective" parameterType="com.telecom.ecloudframework.security.core.model.Client">
+        update
+        <include refid="tableName"/>
+        <set>
+            <include refid="forUpdate"/>
+        </set>
+        where id_ = #{id,jdbcType=VARCHAR}
+    </update>
+
+</mapper>

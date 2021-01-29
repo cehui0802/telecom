@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.telecom.ecloudframework.sys.core.dao.ScheduleHistoryDao">
+
+    <resultMap id="scheduleHistory" type="com.telecom.ecloudframework.sys.api.model.calendar.ScheduleHistory">
+        <id property="id" column="id_" jdbcType="VARCHAR"/>
+        <result property="scheduleId" column="schedule_id_" jdbcType="VARCHAR"/>
+        <result property="rateProgress" column="rate_progress_"/>
+        <result property="submit" column="submit_" jdbcType="VARCHAR"/>
+        <result property="submitName" column="submit_name_" jdbcType="VARCHAR"/>
+        <result property="submitTime" column="submit_time_" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <select id="queryHistory" resultMap="scheduleHistory">
+        select * from c_schedule_history where schedule_id_ = #{scheduleId}
+    </select>
+
+    <insert id="create" parameterType="com.telecom.ecloudframework.sys.api.model.calendar.ScheduleHistory">
+        INSERT INTO c_schedule_history
+        (id_,schedule_id_,rate_progress_,submit_,submit_name_,submit_time_)
+        VALUES
+        (#{id,jdbcType=VARCHAR}, #{scheduleId,jdbcType=VARCHAR}, #{rateProgress}, #{submit,jdbcType=VARCHAR}, #{submitName},#{submitTime})
+    </insert>
+
+</mapper>

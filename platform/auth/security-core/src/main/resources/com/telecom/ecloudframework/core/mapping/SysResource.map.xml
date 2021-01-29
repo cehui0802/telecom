@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.telecom.ecloudframework.security.core.dao.SysResourceDao">
+    <resultMap id="SysResource" type="com.telecom.ecloudframework.security.core.model.SysResource">
+        <id property="id" column="id_" jdbcType="VARCHAR"/>
+        <result property="systemId" column="system_id_" jdbcType="VARCHAR"/>
+        <result property="alias" column="alias_" jdbcType="VARCHAR"/>
+        <result property="name" column="name_" jdbcType="VARCHAR"/>
+        <result property="url" column="url_" jdbcType="VARCHAR"/>
+        <result property="enable" column="enable_" jdbcType="NUMERIC"/>
+        <result property="opened" column="opened_" jdbcType="NUMERIC"/>
+        <result property="type" column="type_" jdbcType="VARCHAR"/>
+        <result property="icon" column="icon_" jdbcType="VARCHAR"/>
+        <result property="sn" column="sn_" jdbcType="NUMERIC"/>
+        <result property="parentId" column="parent_id_" jdbcType="VARCHAR"/>
+        <result property="createTime" column="create_time_" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="tableName">
+        sys_resource
+    </sql>
+
+    <sql id="forUpdate">
+        <if test="systemId != null">
+            system_id_ = #{systemId,jdbcType=VARCHAR},
+        </if>
+        <if test="name != null">
+            name_ = #{name,jdbcType=VARCHAR},
+        </if>
+        <if test="alias != null">
+            alias_ = #{alias,jdbcType=VARCHAR},
+        </if>
+        <if test="type != null">
+            type_ = #{type,jdbcType=VARCHAR},
+        </if>
+        <if test="icon != null">
+            icon_ = #{icon,jdbcType=VARCHAR},
+        </if>
+        <if test="parentId != null">
+            parent_id_ = #{parentId,jdbcType=VARCHAR},
+        </if>
+        <if test="url != null">
+            url_ = #{url,jdbcType=VARCHAR},
+        </if>
+        <if test="sn != null">
+            sn_ = #{sn,jdbcType=NUMERIC},
+        </if>
+        <if test="enable != null">
+            enable_ = #{enable,jdbcType=NUMERIC},
+        </if>
+        <if test="opened != null">
+            opened_ = #{opened,jdbcType=NUMERIC},
+        </if>
+    </sql>
+
+    <insert id="create" parameterType="com.telecom.ecloudframework.security.core.model.SysResource">
+        INSERT INTO
+        <include refid="tableName"/>
+        (id_,system_id_,alias_,name_,url_,enable_,opened_,icon_,type_,sn_,parent_id_,create_time_)
+        VALUES
+        (#{id,jdbcType=VARCHAR}, #{systemId,jdbcType=VARCHAR}, #{alias,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR},
+        #{url,jdbcType=VARCHAR}, #{enable,jdbcType=NUMERIC}, #{opened,jdbcType=NUMERIC}, #{icon,jdbcType=VARCHAR},
+        #{type,jdbcType=VARCHAR}, #{sn,jdbcType=NUMERIC},#{parentId}, now())
+    </insert>
+
+    <select id="get" parameterType="java.lang.String" resultMap="SysResource">
+        SELECT * FROM
+        <include refid="tableName"/>
+        WHERE
+        id_=#{id}
+    </select>
+
+    <select id="query" parameterType="java.util.Map" resultMap="SysResource">
+        SELECT * FROM
+        <include refid="tableName"/>
+        tresource
+        <where>
+            <if test="whereSql!=null">
+                ${whereSql}
+            </if>
+        </where>
+        <if test="orderBySql!=null">
+            ORDER BY ${orderBySql}
+        </if>
+        <if test="orderBySql==null">
+            ORDER BY tresource.sn_,tresource.create_time_
+        </if>
+    </select>
+
+    <update id="update" parameterType="com.telecom.ecloudframework.security.core.model.SysResource">
+        UPDATE
+        <include refid="tableName"/>
+        SET
+        system_id_=#{systemId,jdbcType=VARCHAR},
+        alias_=#{alias,jdbcType=VARCHAR},
+        name_=#{name,jdbcType=VARCHAR},
+        url_=#{url,jdbcType=VARCHAR},
+        enable_=#{enable,jdbcType=NUMERIC},
+        opened_=#{opened,jdbcType=NUMERIC},
+        type_=#{type,jdbcType=VARCHAR},
+        icon_=#{icon,jdbcType=VARCHAR},
+        sn_=#{sn,jdbcType=NUMERIC},
+        parent_id_=#{parentId}
+        WHERE
+        id_=#{id}
+    </update>
+
+    <delete id="remove" parameterType="java.lang.String">
+        DELETE FROM
+        <include refid="tableName"/>
+        WHERE
+        id_=#{id}
+    </delete>
+
+    <select id="getBySystemId" parameterType="java.lang.String" resultMap="SysResource">
+        SELECT * FROM
+        <include refid="tableName"/>
+        WHERE system_id_=#{id} order by sn_ asc, id_ asc
+    </select>
+
+    <select id="getBySystemAndRole" parameterType="java.util.Map" resultMap="SysResource">
+        SELECT a.* FROM
+        <include refid="tableName"/>
+        a, sys_res_role b
+        WHERE a.id_=b.RES_id_ AND b.ROLE_id_=#{roleId} AND b.system_id_=#{systemId}
+        order by a.sn_ asc, a.id_ asc
+    </select>
+
+    <select id="isExist" resultType="java.lang.Integer">
+        SELECT count(1) FROM
+        <include refid="tableName"/>
+        where alias_=#{alias} and system_id_=#{systemId}
+        <if test="id!=null">
+            and id_!=#{id}
+        </if>
+    </select>
+
+    <select id="getByParentId" parameterType="java.lang.String" resultMap="SysResource">
+        SELECT * FROM
+        <include refid="tableName"/>
+        WHERE parent_id_=#{parentId}
+    </select>
+
+    <select id="getBySystemAndUser" resultMap="SysResource">
+        SELECT distinct res.* FROM
+        <include refid="tableName"/>
+        res
+        left join sys_res_role resRole on res.id_=resRole.res_id_
+        left join org_relation userRole on userRole.group_id_ = resRole.role_id_
+        where res.system_id_=#{systemId}
+        and userRole.user_id_=#{userId} and userRole.status_ = '1'
+        order by res.sn_ asc, res.id_ asc
+    </select>
+
+    <select id="getByCode" parameterType="map" resultMap="SysResource">
+        SELECT * FROM
+        <include refid="tableName"/>
+        WHERE
+        alias_=#{code}
+        <if test="excludeId!=null">
+            and id_ != #{excludeId}
+        </if>
+    </select>
+
+    <update id="updateByPrimaryKeySelective" parameterType="com.telecom.ecloudframework.security.core.model.SysResource">
+        update
+        <include refid="tableName"/>
+        <set>
+            <include refid="forUpdate"/>
+        </set>
+        where id_ = #{id,jdbcType=VARCHAR}
+    </update>
+
+
+    <select id="getResResList" parameterType="string" resultType="string">
+        SELECT
+            tresource.id_
+        FROM
+            SYS_RESOURCE tresource,
+            SYS_RES_ROLE tresRole
+        WHERE
+            tRESOURCE.ID_ = tresRole.RES_ID_
+        AND tresRole.ROLE_ID_ = #{roleId}
+        AND tresRole.SYSTEM_ID_ = #{systemId}
+    </select>
+</mapper>

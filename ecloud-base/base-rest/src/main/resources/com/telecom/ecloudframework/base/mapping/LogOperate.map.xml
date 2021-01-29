@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.telecom.ecloudframework.base.operateLog.dao.LogOperateDao">
+    <resultMap id="LogOperate" type="com.telecom.ecloudframework.base.operateLog.model.LogOperate">
+        <id property="id" column="id_" jdbcType="VARCHAR"/>
+        <result property="ip" column="ip_" jdbcType="VARCHAR"/>
+        <result property="userId" column="user_id_" jdbcType="VARCHAR"/>
+        <result property="account" column="account_" jdbcType="VARCHAR"/>
+        <result property="operateTime" column="operate_time_" jdbcType="TIMESTAMP"/>
+        <result property="requestParam" column="request_param_" jdbcType="CLOB"/>
+        <result property="requestHead" column="request_head_" jdbcType="CLOB"/>
+        <result property="path" column="path_" jdbcType="VARCHAR"/>
+        <result property="result" column="result_" jdbcType="NUMERIC"/>
+        <result property="responseResultData" column="response_result_data_" jdbcType="CLOB"/>
+        <result property="backupFileName" column="backup_file_name_" jdbcType="VARCHAR"/>
+        <result property="backupFileType" column="backup_file_type_" jdbcType="VARCHAR"/>
+        <result property="logType" column="log_type_" jdbcType="NUMERIC"/>
+        <result property="operateType" column="operate_type_" jdbcType="NUMERIC"/>
+        <result property="operateItem" column="operate_item_" jdbcType="VARCHAR"/>
+        <result property="operateItemNameKey" column="operate_item_name_key_" jdbcType="VARCHAR"/>
+        <result property="system" column="system_" jdbcType="VARCHAR"/>
+        <result property="operateObjectType" column="operate_object_type_" jdbcType="NUMERIC"/>
+        <result property="type" column="type_" jdbcType="NUMERIC"/>
+        <result property="createTime" column="create_time_" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <!--记录操作日志-->
+    <insert id="create" parameterType="com.telecom.ecloudframework.base.operateLog.model.LogOperate">
+		INSERT INTO SYS_LOG_OPERATE
+		(id_,ip_,user_id_,account_,operate_time_,request_param_,request_head_,path_,result_,response_result_data_,backup_file_name_,
+		backup_file_type_,log_type_,operate_type_,operate_item_,operate_item_name_key_,system_,operate_object_type_,type_,create_time_)
+		VALUES
+		(#{id,jdbcType=VARCHAR}, #{ip,jdbcType=VARCHAR}, #{userId,jdbcType=VARCHAR}, #{account,jdbcType=VARCHAR},#{operateTime,jdbcType=TIMESTAMP},
+		#{requestParam,jdbcType=CLOB},#{requestHead,jdbcType=CLOB},#{path,jdbcType=VARCHAR},#{result,jdbcType=NUMERIC},#{responseResultData,jdbcType=CLOB},
+		#{backupFileName,jdbcType=VARCHAR},#{backupFileType,jdbcType=VARCHAR},#{logType,jdbcType=NUMERIC},#{operateType,jdbcType=NUMERIC},#{operateItem,jdbcType=VARCHAR},
+		#{operateItemNameKey,jdbcType=VARCHAR},#{system,jdbcType=VARCHAR},#{operateObjectType,jdbcType=NUMERIC},#{type,jdbcType=NUMERIC},#{createTime,jdbcType=TIMESTAMP})
+	</insert>
+
+    <!--查询操作日志记录-->
+    <select id="query" parameterType="java.util.Map" resultMap="LogOperate">
+        SELECT
+        toperate.*
+        FROM sys_log_operate toperate
+        <where>
+            <if test="whereSql!=null">
+                ${whereSql}
+            </if>
+        </where>
+        <if test="orderBySql!=null">
+            ORDER BY ${orderBySql}
+        </if>
+    </select>
+
+    <!--删除日志-->
+    <delete id="deleteByDate" parameterType="java.util.Map">
+        delete from sys_log_operate toperate
+        <where>
+            <if test="whereSql!=null">
+                ${whereSql}
+            </if>
+        </where>
+    </delete>
+
+    <!--根据id查询操作日志-->
+    <select id="getLogOperateById" parameterType="java.lang.String" resultMap="LogOperate">
+        SELECT
+        toperate.*
+        FROM sys_log_operate toperate
+        <where>
+            <if test="id!=null and id!=''">
+                toperate.id_=#{id}
+            </if>
+        </where>
+    </select>
+
+</mapper>

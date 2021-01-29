@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.telecom.ecloudframework.security.core.dao.MenuDao">
+    <resultMap id="Menu" type="com.telecom.ecloudframework.security.core.model.Menu">
+        <id property="id" column="id_" jdbcType="VARCHAR"/>
+        <result property="systemId" column="system_id_" jdbcType="VARCHAR"/>
+        <result property="name" column="name_" jdbcType="VARCHAR"/>
+        <result property="code" column="code_" jdbcType="VARCHAR"/>
+        <result property="type" column="type_" jdbcType="VARCHAR"/>
+        <result property="icon" column="icon_" jdbcType="VARCHAR"/>
+        <result property="iconColor" column="icon_color_" jdbcType="VARCHAR"/>
+        <result property="parentId" column="parent_id_" jdbcType="VARCHAR"/>
+        <result property="url" column="url_" jdbcType="VARCHAR"/>
+        <result property="sn" column="sn_" jdbcType="NUMERIC"/>
+        <result property="enable" column="enable_" jdbcType="NUMERIC"/>
+        <result property="createTime" column="create_time_" jdbcType="TIMESTAMP"/>
+        <result property="createBy" column="create_by_" jdbcType="VARCHAR"/>
+        <result property="updateTime" column="update_time_" jdbcType="TIMESTAMP"/>
+        <result property="updateBy" column="update_by_" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="tableName">
+        sys_menu
+    </sql>
+
+    <sql id="forUpdate">
+        <if test="systemId != null">
+            system_id_ = #{systemId,jdbcType=VARCHAR},
+        </if>
+        <if test="name != null">
+            name_ = #{name,jdbcType=VARCHAR},
+        </if>
+        <if test="code != null">
+            code_ = #{code,jdbcType=VARCHAR},
+        </if>
+        <if test="type != null">
+            type_ = #{type,jdbcType=VARCHAR},
+        </if>
+        <if test="icon != null">
+            icon_ = #{icon,jdbcType=VARCHAR},
+        </if>
+        <if test="iconColor != null">
+            icon_color_ = #{iconColor,jdbcType=VARCHAR},
+        </if>
+        <if test="parentId != null">
+            parent_id_ = #{parentId,jdbcType=VARCHAR},
+        </if>
+        <if test="url != null">
+            url_ = #{url,jdbcType=VARCHAR},
+        </if>
+        <if test="sn != null">
+            sn_ = #{sn,jdbcType=NUMERIC},
+        </if>
+        <if test="enable != null">
+            enable_ = #{enable,jdbcType=NUMERIC},
+        </if>
+        <if test="updateBy != null">
+            update_by_ = #{updateBy,jdbcType=VARCHAR},
+        </if>
+        <if test="updateTime != null">
+            update_time_ = #{updateTime,jdbcType=TIMESTAMP},
+        </if>
+    </sql>
+
+    <insert id="create" parameterType="com.telecom.ecloudframework.security.core.model.Menu">
+        INSERT INTO
+        <include refid="tableName"/>
+        (id_,system_id_,name_,code_,type_,icon_,icon_color_,parent_id_,url_,sn_,enable_,create_time_,create_by_,update_time_,update_by_)
+        VALUES
+        (#{id,jdbcType=VARCHAR}, #{systemId,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR},
+        #{code,jdbcType=VARCHAR},#{type,jdbcType=VARCHAR},
+        #{icon,jdbcType=VARCHAR},#{iconColor,jdbcType=VARCHAR}, #{parentId,jdbcType=VARCHAR}, #{url,jdbcType=VARCHAR},
+        #{sn,jdbcType=NUMERIC},
+        #{enable,jdbcType=NUMERIC},
+        #{createTime,jdbcType=TIMESTAMP}, #{createBy,jdbcType=VARCHAR}, #{updateTime,jdbcType=TIMESTAMP},
+        #{updateBy,jdbcType=VARCHAR}
+        )
+    </insert>
+
+    <select id="get" parameterType="java.lang.String" resultMap="Menu">
+        SELECT * FROM
+        <include refid="tableName"/>
+        WHERE
+        id_=#{id}
+    </select>
+
+    <select id="query" parameterType="java.util.Map" resultMap="Menu">
+        SELECT distinct tmenu.* FROM
+        <include refid="tableName"/>
+        tmenu
+        <if test="userId!=null">
+            INNER JOIN sys_menu_role tmenu_role ON tmenu.id_ = tmenu_role.menu_id_
+            AND tmenu.system_id_ = tmenu_role.system_id_
+            INNER JOIN org_relation trelation ON tmenu_role.role_id_ = trelation.group_id_
+            AND trelation.user_id_ = #{userId}
+        </if>
+        <where>
+            <if test="whereSql!=null">
+                ${whereSql}
+            </if>
+        </where>
+        <if test="orderBySql!=null">
+            ORDER BY ${orderBySql}
+        </if>
+        <if test="orderBySql==null">
+            ORDER BY tmenu.sn_,tmenu.create_time_
+        </if>
+    </select>
+
+    <update id="update" parameterType="com.telecom.ecloudframework.security.core.model.Menu">
+        UPDATE
+        <include refid="tableName"/>
+        SET
+        system_id_=#{systemId,jdbcType=VARCHAR},
+        name_=#{name,jdbcType=VARCHAR},
+        code_=#{code,jdbcType=VARCHAR},
+        type_=#{type,jdbcType=VARCHAR},
+        icon_=#{icon,jdbcType=VARCHAR},
+        icon_color_=#{iconColor,jdbcType=VARCHAR},
+        parent_id_=#{parentId,jdbcType=VARCHAR},
+        url_=#{url,jdbcType=VARCHAR},
+        sn_=#{sn,jdbcType=NUMERIC},
+        enable_=#{enable,jdbcType=NUMERIC},
+        update_time_=now(),
+        update_by_=#{updateBy,jdbcType=VARCHAR}
+        WHERE
+        id_=#{id}
+    </update>
+
+    <delete id="remove" parameterType="java.lang.String">
+        DELETE FROM
+        <include refid="tableName"/>
+        WHERE
+        id_=#{id}
+    </delete>
+
+    <select id="getByCode" parameterType="map" resultMap="Menu">
+        SELECT * FROM
+        <include refid="tableName"/>
+        WHERE
+        code_=#{code}
+        and system_id_=#{systemId}
+        <if test="excludeId!=null">
+            and id_ != #{excludeId}
+        </if>
+    </select>
+
+    <update id="updateByPrimaryKeySelective" parameterType="com.telecom.ecloudframework.security.core.model.Menu">
+        update
+        <include refid="tableName"/>
+        <set>
+            <include refid="forUpdate"/>
+        </set>
+        where id_ = #{id,jdbcType=VARCHAR}
+    </update>
+
+
+    <select id="getRoleMenuList" parameterType="string" resultType="string">
+        SELECT
+            tmenu.id_
+        FROM
+            sys_menu tmenu,
+            SYS_MENU_ROLE tmenuRole
+        WHERE
+            tmenu.ID_ = tmenuRole.MENU_ID_
+        AND tmenuRole.ROLE_ID_ = #{roleId}
+        AND tmenuRole.SYSTEM_ID_ = #{systemId}
+    </select>
+</mapper>

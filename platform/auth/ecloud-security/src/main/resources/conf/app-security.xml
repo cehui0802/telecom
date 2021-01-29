@@ -1,0 +1,123 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+	http://www.springframework.org/schema/security
+	http://www.springframework.org/schema/security/spring-security-4.2.xsd">
+    <!-- security 版本 -->
+    <security:http pattern="/privilege/**" security="none"/>
+    <security:http entry-point-ref="authenticationLoginEntry" pattern="/**">
+        <security:remember-me key="rememberPrivateKey"/>
+        <security:logout logout-url="org/logout" success-handler-ref="logoutSuccessHandler"/>
+
+        <security:custom-filter before="FORM_LOGIN_FILTER" ref="jwtAuthenticationFilter"/>
+
+        <security:custom-filter ref="csrfFilter" after="CAS_FILTER"/>
+
+        <security:custom-filter ref="requestThreadFilter" after="CSRF_FILTER"/>
+        <security:custom-filter ref="encodingFilter" before="PRE_AUTH_FILTER"/>
+        <security:custom-filter ref="openApiAuthenticationFilter" after="FORM_LOGIN_FILTER"/>
+        <security:custom-filter ref="ssoFilter" before="CAS_FILTER"/>
+
+        <security:custom-filter before="FILTER_SECURITY_INTERCEPTOR" ref="securityInterceptor"/>
+        <security:access-denied-handler ref="accessDeniedHandler"/>
+        <security:headers>
+            <security:frame-options policy="SAMEORIGIN"/>
+        </security:headers>
+        <security:csrf disabled="true"/>
+    </security:http>
+    <!-- jwt 判断登录用户的过滤器 -->
+    <bean id="jwtAuthenticationFilter"
+          class="com.telecom.ecloudframework.security.authentication.JWTAuthenticationFilter"/>
+
+    <bean id="authenticationLoginEntry"
+          class="com.telecom.ecloudframework.security.forbidden.DefualtAuthenticationEntryPoint"/>
+    <bean id="accessDeniedHandler" class="com.telecom.ecloudframework.security.forbidden.DefaultAccessDeniedHandler"/>
+    <bean id="logoutSuccessHandler" class="com.telecom.ecloudframework.security.login.logout.DefualtLogoutSuccessHandler"/>
+
+    <bean id="localeResolver" class="org.springframework.web.servlet.i18n.CookieLocaleResolver"
+          p:defaultLocale="zh_CN"/>
+
+    <!-- 防止XSS注入 -->
+    <bean id="xssFilter" class="com.telecom.ecloudframework.security.filter.XssFilter">
+        <property name="ingores">
+            <list>
+                <value>/login.*</value>
+            </list>
+        </property>
+    </bean>
+    <!-- 防止CSRF攻击 -->
+    <bean id="csrfFilter" class="com.telecom.ecloudframework.security.filter.RefererCsrfFilter">
+        <property name="ingores">
+            <list>
+                <value>127.0.0.1</value>
+                <value>localhost</value>
+                <value>bpm.ecloud.work</value>
+                <value>bpm-app.ecloud.work</value>
+                <value>bpm-native.ecloud.work</value>
+                <value>bpm-new.ecloud.work</value>
+                <value>bpm-portal.ecloud.work</value>
+                <value>bpm-portal.ecloud.gwssi</value>
+                <value>bpm-dataset.ecloud.work</value>
+                <value>bpm.ecloud.product</value>
+                <value>bpm-portal.ecloud.product</value>
+                <value>eworker.bpm.ecloud</value>
+                <value>dataset.bpm.ecloud</value>
+                <value>goffice.bpm.ecloud</value>
+                <value>goffice.xw.org</value>
+                <value>g1.xw.org</value>
+            </list>
+        </property>
+    </bean>
+
+    <!-- request 请求filter 主要清除线程 变量，为线程添加request 线程变量 -->
+    <bean id="requestThreadFilter" class="com.telecom.ecloudframework.security.filter.RequestThreadFilter"/>
+    <!-- 编码过滤器， 设置当前系统的编码,并支持所有跨域请求,让跨域通过 csrfFilter 来控制  -->
+    <bean id="encodingFilter" class="com.telecom.ecloudframework.security.filter.EncodingFilter"/>
+
+    <!-- SSO 过滤器  -->
+    <bean id="ssoFilter" class="com.telecom.ecloudframework.security.filter.SsoFilter"/>
+    <!-- openapi 权限校验  -->
+    <bean id="openApiAuthenticationFilter"
+          class="com.telecom.ecloudframework.security.authentication.OpenApiAuthenticationFilter"/>
+
+    <!-- 获取用户对象信息 -->
+    <bean id="userDetailsService" class="com.telecom.ecloudframework.security.login.UserDetailsServiceImpl"/>
+    <bean id="passwordEncoder" class="com.telecom.ecloudframework.security.login.CustomPwdEncoder"/>
+
+    <security:authentication-manager alias="authenticationManager">
+        <security:authentication-provider user-service-ref="userDetailsService">
+            <security:password-encoder ref="passwordEncoder"/>
+        </security:authentication-provider>
+    </security:authentication-manager>
+
+    <!-- 访问决策器 -->
+    <bean id="accessDecisionManager"
+          class="com.telecom.ecloudframework.security.authentication.AccessDecisionManagerImpl"/>
+    <!-- 获取 URL 对应的角色 -->
+    <bean id="securityMetadataSource"
+          class="com.telecom.ecloudframework.security.authentication.FilterInvocationSecurityMetadataSourceImpl">
+        <property name="ingores">
+            <list>
+                <value>/login.*</value>
+                <value>/ui/*</value>
+            </list>
+        </property>
+    </bean>
+
+    <!-- 授权判断 -->
+    <bean id="securityInterceptor" class="com.telecom.ecloudframework.security.authentication.SecurityInterceptor">
+        <property name="authenticationManager" ref="authenticationManager"/>
+        <property name="accessDecisionManager" ref="accessDecisionManager"/>
+        <property name="securityMetadataSource" ref="securityMetadataSource"/>
+    </bean>
+
+    <!-- 将当前登录用户等登录信息注入进contextUtil中 -->
+    <bean id="loginContext" class="com.telecom.ecloudframework.security.login.context.LoginContext"/>
+    <bean id="contextUtil" class="com.telecom.ecloudframework.sys.util.ContextUtil">
+        <property name="currentContext" ref="loginContext"/>
+    </bean>
+
+</beans>
