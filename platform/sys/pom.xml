@@ -19,7 +19,7 @@
 
     <!-- 定义参数 1-->
     <properties>
-        <com.jayway.jsonpath>0.9.1</com.jayway.jsonpath>
+        <com.jayway.jsonpath>2.4.0</com.jayway.jsonpath>
         <activeMq.version>5.9.0</activeMq.version>
         <io.lettuce.core.version>5.1.6.RELEASE</io.lettuce.core.version>
     </properties>
