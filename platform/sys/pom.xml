@@ -15,6 +15,7 @@
         <module>sys-api</module>
         <module>sys-core</module>
         <module>sys-rest</module>
+        <module>sys-mq</module>
     </modules>
 
     <!-- 定义参数 1-->
