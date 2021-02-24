@@ -84,7 +84,6 @@ public class JWTService {
 	@Value("${ecloud.jwt.:15}")
 	private Long notBeforeMinute;
 	
-	@Autowired
 	private ICache<String> icache;
 
 	
