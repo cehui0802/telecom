@@ -114,6 +114,7 @@
                     <props>
                         <prop key="MySQL">mysql</prop>
                         <prop key="Oracle">oracle</prop>
+                        <prop key="dmsql">dmsql</prop>
                         <prop key="drds">drds</prop>
                     </props>
                 </property>
@@ -122,7 +123,7 @@
     </bean>
 
     <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
-        <property name="basePackage" value="com.telecom.ecloudframework.**.dao,com.telecom.ecloudbpm.**.dao,com.telecom.ecloud.**.dao"/>
+        <property name="basePackage" value="com.telecom.ecloudframework.**.dao"/>
         <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
     </bean>
 
