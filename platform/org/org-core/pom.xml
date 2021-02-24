@@ -16,6 +16,11 @@
             <scope>test</scope>
         </dependency>
 
+
+        <dependency>
+            <groupId>com.telecom</groupId>
+            <artifactId>base-api</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.telecom</groupId>
             <artifactId>base-rest</artifactId>
