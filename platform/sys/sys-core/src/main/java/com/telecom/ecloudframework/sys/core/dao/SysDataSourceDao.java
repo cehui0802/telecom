@@ -4,6 +4,7 @@ import org.mybatis.spring.annotation.MapperScan;
 
 import com.telecom.ecloudframework.base.dao.BaseDao;
 import com.telecom.ecloudframework.sys.core.model.SysDataSource;
+import org.springframework.stereotype.Repository;
 
 /**
  * <pre>
@@ -15,6 +16,6 @@ import com.telecom.ecloudframework.sys.core.model.SysDataSource;
  * 版权：summer
  * </pre>
  */
-@MapperScan
+@Repository
 public interface SysDataSourceDao extends BaseDao<String, SysDataSource> {
 }
