@@ -16,6 +16,8 @@ import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
 import java.lang.reflect.Method;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -55,24 +57,23 @@ public class DataSourceInitListener implements ApplicationListener<ContextRefres
      * </pre>
      */
     private void loadDataSourceFromSysDataSource() {
-        for (SysDataSource sysDataSource : sysDataSourceManager.getAll()) {
-            // 系统数据源，同时sysDataSource表中的数据库类型跟配置文件的不一致
-            if (sysDataSource.getKey().equals(DataSourceUtil.DEFAULT_DATASOURCE) && !PropertyUtil.getJdbcType().equals(sysDataSource.getDbType())) {
+        Iterator var1 = this.sysDataSourceManager.getAll().iterator();
+
+        while(var1.hasNext()) {
+            SysDataSource sysDataSource = (SysDataSource)var1.next();
+            if (sysDataSource.getKey().equals("dataSourceDefault") && !PropertyUtil.getJdbcType().equals(sysDataSource.getDbType())) {
                 sysDataSource.setDbType(PropertyUtil.getJdbcType());
-                sysDataSourceManager.update(sysDataSource);
-
+                this.sysDataSourceManager.update(sysDataSource);
             }
 
-            // 本地数据源不需要再次增加进去
-            if (DataSourceUtil.isDataSourceExist(sysDataSource.getKey()) || sysDataSource.getKey().equals(DataSourceUtil.GLOBAL_DATASOURCE) || sysDataSource.getKey().equals(DataSourceUtil.DEFAULT_DATASOURCE)) {
-                continue;
-            }
-            try {
-                DataSource dataSource = sysDataSourceManager.tranform2DataSource(sysDataSource);
-                DataSourceUtil.addDataSource(sysDataSource.getKey(), dataSource, sysDataSource.getDbType(), false);
-                LOGGER.debug("add datasource " + sysDataSource.getKey());
-            } catch (Exception e) {
-                LOGGER.error("在系统配置的数据源[" + sysDataSource.getKey() + "]启动项目时无法正确加载进去，请正确配置该数据源", e);
+            if (!DataSourceUtil.isDataSourceExist(sysDataSource.getKey()) && !sysDataSource.getKey().equals("dataSource") && !sysDataSource.getKey().equals("dataSourceDefault")) {
+                try {
+                    DataSource dataSource = this.sysDataSourceManager.tranform2DataSource(sysDataSource);
+                    DataSourceUtil.addDataSource(sysDataSource.getKey(), dataSource, sysDataSource.getDbType(), false);
+                    LOGGER.debug("add datasource " + sysDataSource.getKey());
+                } catch (Exception var4) {
+                    LOGGER.error("在系统配置的数据源[" + sysDataSource.getKey() + "]启动项目时无法正确加载进去，请正确配置该数据源", var4);
+                }
             }
         }
     }
@@ -122,9 +123,9 @@ public class DataSourceInitListener implements ApplicationListener<ContextRefres
                     return dbType.getKey();
                 }
             }
-            return "dmsql";
+            return "mysql";
         } catch (Exception e) {
-            return "dmsql";
+            return "mysql";
         }
     }
 
