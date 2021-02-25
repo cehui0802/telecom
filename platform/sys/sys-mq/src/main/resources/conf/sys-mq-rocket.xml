@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+
+    <bean id="jmsConfig" class="com.telecom.ecloudframework.sys.simplemq.config.JmsConfigImpl">
+        <property name="name" value="${rocketmq.simple-mq.name}"/>
+    </bean>
+
+    <bean id="defaultMQProducer" class="org.apache.rocketmq.client.producer.DefaultMQProducer">
+        <property name="producerGroup" value="${rocketmq.producer.group}"/>
+        <property name="sendMsgTimeout" value="${rocketmq.producer.send-message-timeout}"/>
+        <property name="namesrvAddr" value="${rocketmq.namesrv.addr}"/>
+        <property name="instanceName" value="${rocketmq.client.name}"/>
+        <property name="vipChannelEnabled" value="${com.rocketmq.sendMessageWithVIPChannel}"/>
+    </bean>
+
+    <!-- 生产者-->
+    <bean id="jmsProducer" class="com.telecom.ecloudframework.sys.simplemq.producer.RoketMqMessageProducer" init-method="init" destroy-method="destory">
+        <property name="mqProducer" ref="defaultMQProducer"/>
+        <property name="jmsConfig" ref="jmsConfig"/>
+    </bean>
+
+    <bean id="rocketMessageQueueConsumer" class="com.telecom.ecloudframework.sys.simplemq.consumer.RocketMessageQueueConsumer">
+        <!--消费者组-->
+        <property name="consumerGroup" value="${ecloud.simple-mq.rocket-consumer.consumer-group}"/>
+        <!--nameServer地址-->
+        <property name="nameServer" value="${rocketmq.namesrv.addr}"/>
+        <!--tag标签 tag1||tag2||tag3-->
+        <property name="subExpression" value="${ecloud.simple-mq.rocket-consumer.sub-expression}"/>
+        <!--注入消息主题-->
+        <property name="jmsConfig" ref="jmsConfig"/>
+    </bean>
+
+
+</beans>
