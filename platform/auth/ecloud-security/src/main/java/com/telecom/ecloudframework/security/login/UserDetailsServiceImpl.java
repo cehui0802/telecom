@@ -31,7 +31,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     UserService userService;
     @Resource
     ICache<LoginUser> loginUserCache;
-    @Autowired
+    @Resource
     JWTService jwtService;
 
     /**

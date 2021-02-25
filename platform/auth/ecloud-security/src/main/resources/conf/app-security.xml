@@ -54,20 +54,6 @@
             <list>
                 <value>127.0.0.1</value>
                 <value>localhost</value>
-                <value>bpm.ecloud.work</value>
-                <value>bpm-app.ecloud.work</value>
-                <value>bpm-native.ecloud.work</value>
-                <value>bpm-new.ecloud.work</value>
-                <value>bpm-portal.ecloud.work</value>
-                <value>bpm-portal.ecloud.gwssi</value>
-                <value>bpm-dataset.ecloud.work</value>
-                <value>bpm.ecloud.product</value>
-                <value>bpm-portal.ecloud.product</value>
-                <value>eworker.bpm.ecloud</value>
-                <value>dataset.bpm.ecloud</value>
-                <value>goffice.bpm.ecloud</value>
-                <value>goffice.xw.org</value>
-                <value>g1.xw.org</value>
             </list>
         </property>
     </bean>
